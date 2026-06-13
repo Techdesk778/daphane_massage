@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Updated to 4.4.4 as suggested by Android to read your google-services.json file
+        classpath 'com.google.gms:google-services:4.4.4'
+    }
+}
+
 allprojects {
     repositories {
         google()

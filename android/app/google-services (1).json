@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "523806673732",
+    "project_id": "daphane-massage",
+    "storage_bucket": "daphane-massage.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523806673732:android:4f7360193fea7990506511",
+        "android_client_info": {
+          "package_name": "com.daphane.massage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO4sWBwlKYrgN1_SVYUpQTkyrIteFftww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

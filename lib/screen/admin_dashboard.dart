@@ -14,6 +14,10 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
   String _category = 'Beginner';
   final List<String> _categories = ['Beginner', 'Intermediate', 'Advanced'];
 
+  // Video Upload State
+  bool _isYoutubeMode = true;
+  String? _selectedFileName;
+
   // Mock User Data for management
   final List<Map<String, String>> _users = [
     {"name": "Alice Smith", "email": "alice@example.com", "plan": "Beginner", "status": "Active"},
@@ -100,8 +104,40 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
               _buildCategoryDropdown(),
               const SizedBox(height: 16),
               _buildAdminTextField("Cost (\$)", Icons.attach_money, isNumber: true),
+              const SizedBox(height: 24),
+
+              const Text("Select Source", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.navy)),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Center(child: Text("YouTube Link")),
+                      selected: _isYoutubeMode,
+                      onSelected: (val) => setState(() => _isYoutubeMode = true),
+                      selectedColor: AppColors.sharpPink.withOpacity(0.2),
+                      labelStyle: TextStyle(color: _isYoutubeMode ? AppColors.sharpPink : AppColors.textLight),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Center(child: Text("Desktop File")),
+                      selected: !_isYoutubeMode,
+                      onSelected: (val) => setState(() => _isYoutubeMode = false),
+                      selectedColor: AppColors.sharpPink.withOpacity(0.2),
+                      labelStyle: TextStyle(color: !_isYoutubeMode ? AppColors.sharpPink : AppColors.textLight),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
-              _buildAdminTextField("Video URL (YouTube)", Icons.link),
+
+              if (_isYoutubeMode)
+                _buildAdminTextField("Video URL (YouTube)", Icons.link)
+              else
+                _buildFilePickerUI(),
+
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -110,6 +146,10 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.sharpPink, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      if (!_isYoutubeMode && _selectedFileName == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please select a file")));
+                        return;
+                      }
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Video Published!")));
                     }
                   },
@@ -118,6 +158,39 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilePickerUI() {
+    return InkWell(
+      onTap: () {
+        // Mock file selection logic
+        setState(() => _selectedFileName = "facial_massage_intro.mp4");
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.cloud_upload_outlined, color: AppColors.sharpPink, size: 40),
+            const SizedBox(height: 12),
+            Text(
+              _selectedFileName ?? "Click to upload from desktop",
+              style: TextStyle(color: _selectedFileName != null ? AppColors.navy : AppColors.textLight, fontWeight: _selectedFileName != null ? FontWeight.bold : FontWeight.normal),
+            ),
+            if (_selectedFileName != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text("Size: 42.5 MB", style: TextStyle(color: AppColors.textLight, fontSize: 12)),
+              ),
+          ],
         ),
       ),
     );

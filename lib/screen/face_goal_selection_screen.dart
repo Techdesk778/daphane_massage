@@ -1,4 +1,3 @@
-import 'package:daphane_massage/screen/sign_up.dart';
 import 'package:flutter/material.dart';
 import '../component /app_colors.dart';
 
@@ -12,13 +11,14 @@ class FaceGoalSelectionScreen extends StatefulWidget {
 class _FaceGoalSelectionScreenState extends State<FaceGoalSelectionScreen> {
   String? _selectedShape;
 
+  // Updated with human face emojis that represent the shapes better
   final List<Map<String, String>> faceShapes = [
-    {"name": "Heart", "icon": "❤️"},
-    {"name": "Oval", "icon": "🥚"},
-    {"name": "Triangle", "icon": "🔺"},
-    {"name": "Round", "icon": "⭕"},
-    {"name": "Square", "icon": "⬜"},
-    {"name": "Diamond", "icon": "💎"},
+    {"name": "Heart", "icon": "👩‍❤️"},
+    {"name": "Oval", "icon": "👩‍🦲"},
+    {"name": "Triangle", "icon": "👸"},
+    {"name": "Round", "icon": "🧒"},
+    {"name": "Square", "icon": "🧔"},
+    {"name": "Diamond", "icon": "👩‍🎨"},
   ];
 
   @override
@@ -26,14 +26,13 @@ class _FaceGoalSelectionScreenState extends State<FaceGoalSelectionScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView( // Added scroll view to prevent overflows
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Progress Bar
                 const Text("40% Complete", style: TextStyle(color: AppColors.textLight)),
                 const SizedBox(height: 8),
                 const LinearProgressIndicator(
@@ -47,13 +46,12 @@ class _FaceGoalSelectionScreenState extends State<FaceGoalSelectionScreen> {
 
                 const SizedBox(height: 30),
 
-                // Selection Grid
                 GridView.builder(
-                  shrinkWrap: true, // Allows GridView to work inside a SingleChildScrollView
-                  physics: const NeverScrollableScrollPhysics(), // Disables internal scrolling
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 1.3,
+                    childAspectRatio: 1.1,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
@@ -68,22 +66,39 @@ class _FaceGoalSelectionScreenState extends State<FaceGoalSelectionScreen> {
 
                         Future.delayed(const Duration(milliseconds: 300), () {
                           if (context.mounted) {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => const SignupScreen()));
+                            Navigator.pushNamed(context, '/signUp');
                           }
                         });
                       },
                       child: Container(
                         decoration: BoxDecoration(
                           color: isSelected ? AppColors.accentPink : AppColors.surface,
-                          border: Border.all(color: isSelected ? AppColors.sharpPink : Colors.grey.shade200),
-                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isSelected ? AppColors.sharpPink : Colors.grey.shade200,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: isSelected ? [
+                            BoxShadow(
+                              color: AppColors.sharpPink.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ] : [],
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(shape['icon']!, style: const TextStyle(fontSize: 40)),
-                            const SizedBox(height: 8),
-                            Text(shape['name']!, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                            Text(shape['icon']!, style: const TextStyle(fontSize: 48)),
+                            const SizedBox(height: 12),
+                            Text(
+                              shape['name']!,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? AppColors.sharpPink : AppColors.textDark,
+                                fontSize: 16,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -91,35 +106,37 @@ class _FaceGoalSelectionScreenState extends State<FaceGoalSelectionScreen> {
                   },
                 ),
 
-                const SizedBox(height: 40), // Spacing for the buttons
+                const SizedBox(height: 40),
 
-                // Optional Manual Button
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedShape == null ? Colors.grey : AppColors.sharpPink,
+                      backgroundColor: _selectedShape == null ? Colors.grey.shade300 : AppColors.sharpPink,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: _selectedShape == null ? 0 : 4,
                     ),
                     onPressed: _selectedShape == null
                         ? null
                         : () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SignupScreen()));
+                      Navigator.pushNamed(context, '/signUp');
                     },
-                    child: const Text("Continue to Analysis", style: TextStyle(color: Colors.white, fontSize: 18)),
+                    child: const Text("Continue to Analysis", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
+                const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignupScreen(),
-                        )
-                    );
+                    Navigator.pushNamed(context, '/signUp');
                   },
-                  child: const Center(child: Text("not sure yet", style: TextStyle(color: AppColors.primaryBlue))),
+                  child: const Center(
+                    child: Text(
+                        "not sure yet",
+                        style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.w600)
+                    ),
+                  ),
                 ),
               ],
             ),

@@ -1,21 +1,74 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../component /app_colors.dart';
+import '../component /app_colors.dart'; // Preserved trailing space as per your directory structure
 import 'user_dashboard.dart';
 
-class SigninScreen extends StatelessWidget {
-  const SigninScreen({super.key});
+class SigninScreen extends StatefulWidget {
+  final VoidCallback showSignUpScreen;
+
+  // FIXED: Standardized constructor formatting using super.key parameters
+  const SigninScreen({
+    super.key,
+    required this.showSignUpScreen,
+  });
+
+  @override
+  State<SigninScreen> createState() => _SigninScreenState();
+}
+
+class _SigninScreenState extends State<SigninScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  void signIn() async {
+    try {
+      // 1. Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.sharpPink)),
+      );
+
+      // 2. Execute Firebase Authentication
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // 3. Pop loading dialog
+      if (mounted) Navigator.pop(context);
+
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Remove loader
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? "Authentication failed"),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.navy, // Updated to Rich Navy
+      backgroundColor: AppColors.navy,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
               // Branding Area
-              const Icon(Icons.spa, size: 64, color: AppColors.sharpPink), // Updated to Sharp Pink
+              const Icon(Icons.spa, size: 64, color: AppColors.sharpPink),
               const SizedBox(height: 24),
               const Text(
                 "Welcome Back",
@@ -42,25 +95,59 @@ class SigninScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    _buildModernTextField("Email Address", Icons.email_outlined),
+                    _buildModernTextField(
+                        controller: _emailController,
+                        hint: "Email Address",
+                        icon: Icons.email_outlined
+                    ),
                     const SizedBox(height: 16),
-                    _buildModernTextField("Password", Icons.lock_outline, obscure: true),
+                    _buildModernTextField(
+                        controller: _passwordController,
+                        hint: "Password",
+                        icon: Icons.lock_outline,
+                        obscure: true
+                    ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const UserDashboard())),
+                        onPressed: signIn,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.sharpPink, // Updated to Sharp Pink
+                          backgroundColor: AppColors.sharpPink,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         ),
-                        child: const Text("Sign In", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        child: const Text(
+                            "Sign In",
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
+
+              const SizedBox(height: 32),
+
+              // --- SIGN UP TOGGLE NAVIGATION LINK ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Don't have an account? ", style: TextStyle(color: Colors.white70)),
+                  GestureDetector(
+                    onTap: widget.showSignUpScreen, // FIXED: Correct class instance referencing loop invocation
+                    child: const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: AppColors.sharpPink,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -68,8 +155,14 @@ class SigninScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModernTextField(String hint, IconData icon, {bool obscure = false}) {
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscure = false
+  }) {
     return TextField(
+      controller: controller,
       obscureText: obscure,
       style: const TextStyle(color: AppColors.textDark),
       decoration: InputDecoration(
@@ -79,7 +172,7 @@ class SigninScreen extends StatelessWidget {
         filled: true,
         fillColor: const Color(0xFFF0F0F0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.sharpPink, width: 2)), // Updated to Sharp Pink
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.sharpPink, width: 2)),
       ),
     );
   }

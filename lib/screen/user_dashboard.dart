@@ -1,13 +1,16 @@
+import 'package:daphane_massage/screen/profile.dart';
+import 'package:daphane_massage/screen/routine_tracker.dart';
+import 'package:daphane_massage/screen/notification_screen.dart'; // Added relative reference hook
 import 'package:flutter/material.dart';
-import '../component /app_colors.dart';
+import '../component /app_colors.dart'; // Verify space in this folder name path
 import '../component /beginner.dart';
+import '../component /face_assesment.dart';
 import '../component /intermediate.dart';
-import '../component /advance.dart';
+import '../component /advance.dart'; // Keep an eye on advance vs advanced naming schemes
 import '../component /tab_bar.dart';
 import '../component /bottom_nav_bar.dart';
 import 'equipment_list.dart';
 import 'face_analysis.dart';
-
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({super.key});
@@ -37,9 +40,9 @@ class _UserDashboardState extends State<UserDashboard> {
       case 0:
         return _buildDashboardContentWrapper();
       case 1:
-        return const Center(child: Text("Routine Page", style: TextStyle(color: Colors.white)));
+        return const RoutineTrackerScreen();
       case 2:
-        return const Center(child: Text("Profile Page", style: TextStyle(color: Colors.white)));
+        return const ProfileScreen();
       default:
         return _buildDashboardContentWrapper();
     }
@@ -52,14 +55,65 @@ class _UserDashboardState extends State<UserDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Welcome back, Daphane Massage",
-                style: TextStyle(color: Colors.white70)),
-            const SizedBox(height: 8),
-            const Text("Daily Routine",
-                style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white)),
+            // --- HEADER GREETING & NOTIFICATION BAR OVERLAY ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Welcome back,", style: TextStyle(color: Colors.white70)),
+                    SizedBox(height: 4),
+                    Text(
+                      "Daily Routine",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                // Modern Action Badge Button
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.06),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.05), width: 1),
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(
+                          Icons.notifications_none_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        // Unseen Indicator Dot
+                        Positioned(
+                          top: 1,
+                          right: 2,
+                          child: CircleAvatar(
+                            radius: 4,
+                            backgroundColor: AppColors.sharpPink,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
             const SizedBox(height: 24),
 
             _buildActionCard(
@@ -80,19 +134,32 @@ class _UserDashboardState extends State<UserDashboard> {
             Row(
               children: [
                 Expanded(
-                    child: _buildSmallCard("Face Assessment", "Take Face Assessment Test",
-                        Icons.face, onTap: () {
-                          // Optional: Navigate to assessment
-                        })),
+                  child: _buildSmallCard(
+                    "Face Assessment",
+                    "Take Face Assessment Test",
+                    Icons.face,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FaceAssessmentScreen()),
+                      );
+                    },
+                  ),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
-                    child: _buildSmallCard("Face Yoga Equipment", "Tools for Your Ritual",
-                        Icons.spa_outlined, onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const EquipmentListScreen()),
-                          );
-                        })),
+                  child: _buildSmallCard(
+                    "Face Yoga Equipment",
+                    "Tools for Your Ritual",
+                    Icons.spa_outlined,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const EquipmentListScreen()),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -119,7 +186,7 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  // --- Helper Methods ---
+  // --- Helper Layout Generation Methods ---
 
   Widget _buildActionCard(
       String title, String subtitle, IconData icon, Color color,
