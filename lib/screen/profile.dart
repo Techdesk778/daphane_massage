@@ -1,6 +1,5 @@
 import 'dart:io';
-import 'package:daphane_massage/screen/security_privacy.dart';
-import 'package:flutter/foundation.dart'; // Required for kIsWeb cross-platform detection
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,9 +8,7 @@ import '../core/logic/account_logic.dart';
 import '../core/services/user_session.dart';
 import 'account_details.dart';
 import 'notification_screen.dart';
-
-// TODO: Ensure this logic utility file import path is added to match your project structure:
-// import '../core/utils/account_logic.dart';
+import 'security_privacy.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,8 +19,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
-  XFile? _imageFile;
-  Uint8List? _webImage; // Bytes for Web display support
+  XFile? _tempImageFile;
+  Uint8List? _tempWebImage;
 
   Future<void> _pickProfileImage() async {
     try {
@@ -35,9 +32,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
         setState(() {
-          _webImage = bytes;
-          _imageFile = pickedFile;
+          _tempWebImage = bytes;
+          _tempImageFile = pickedFile;
         });
+
+        // TODO: In production, upload 'bytes' to Firebase Storage
+        // and save the URL to Firestore.
+        // UserSessionService.instance.updateUserData({'profileImageUrl': downloadUrl});
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
@@ -51,10 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text("Sign Out"),
         content: const Text("Are you sure you want to end your ritual session?"),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(color: AppColors.textDark)),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
@@ -74,34 +72,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text("Your Ritual Profile", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text("Your Profile", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: ValueListenableBuilder<Map<String, dynamic>?>(
         valueListenable: UserSessionService.instance.currentUserData,
         builder: (context, userData, child) {
+          // These now pull directly from the real-time Firestore listener
           final String displayName = userData?['fullName'] ?? "Glow Ritualist";
           final String displayEmail = userData?['email'] ?? FirebaseAuth.instance.currentUser?.email ?? "";
-
-          // ADDED CODE BLOCKS:
           final String rawPlan = userData?['subscriptionPackage'] ?? "Beginner";
-          final String tierLabel = AccountLogic.getTierDisplay(rawPlan); // Call separated logic
+          final String tierLabel = AccountLogic.getTierDisplay(rawPlan);
+          final String? firestoreImageUrl = userData?['profileImageUrl'];
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                // --- AVATAR SECTION ---
                 Center(
                   child: Stack(
                     children: [
                       CircleAvatar(
                         radius: 60,
                         backgroundColor: Colors.white.withOpacity(0.1),
-                        backgroundImage: _webImage != null
-                            ? MemoryImage(_webImage!)
-                            : (_imageFile != null && !kIsWeb ? FileImage(File(_imageFile!.path)) : null),
-                        child: (_imageFile == null && _webImage == null)
+                        backgroundImage: _tempWebImage != null
+                            ? MemoryImage(_tempWebImage!)
+                            : (firestoreImageUrl != null
+                            ? NetworkImage(firestoreImageUrl) as ImageProvider
+                            : (_tempImageFile != null && !kIsWeb ? FileImage(File(_tempImageFile!.path)) : null)),
+                        child: (_tempWebImage == null && _tempImageFile == null && firestoreImageUrl == null)
                             ? const Icon(Icons.person, size: 60, color: Colors.white70)
                             : null,
                       ),
@@ -125,16 +124,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(displayEmail, style: const TextStyle(fontSize: 14, color: Colors.white70)),
                 const SizedBox(height: 32),
 
-                // --- SUBSCRIPTION STATUS CARD ---
+                // --- PLAN CARD ---
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.sharpPink, Color(0xFFD43F8D)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    gradient: const LinearGradient(colors: [AppColors.sharpPink, Color(0xFFD43F8D)]),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Row(
@@ -147,7 +142,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             const Text("CURRENT PLAN", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white70)),
                             const SizedBox(height: 4),
-                            // UPDATED: Dynamically presents calibrated parsed string output data value cleanly
                             Text(tierLabel, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
                           ],
                         ),
@@ -160,16 +154,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // --- SETTINGS LIST ---
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
                   child: Column(
                     children: [
                       _buildSettingTile(
                         icon: Icons.person_outline,
                         title: "Account Details",
-                        subtitle: "Update personal spa preferences",
+                        subtitle: "View your registration info",
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountDetailsScreen())),
                       ),
                       const Divider(height: 1, indent: 56),

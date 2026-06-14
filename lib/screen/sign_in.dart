@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../component /app_colors.dart'; // Preserved trailing space as per your directory structure
-import 'user_dashboard.dart';
+import 'forgot_password.dart';
+
 
 class SigninScreen extends StatefulWidget {
   final VoidCallback showSignUpScreen;
@@ -123,6 +124,29 @@ class _SigninScreenState extends State<SigninScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+
+                    // --- CENTERED FORGOT PASSWORD TEXT LINK ---
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
+                      child: const Center(
+                        child: Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -147,7 +171,6 @@ class _SigninScreenState extends State<SigninScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),

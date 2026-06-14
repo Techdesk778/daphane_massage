@@ -18,6 +18,7 @@ class UserSessionService {
     _auth.authStateChanges().listen((User? user) {
       if (user == null) {
         _userSubscription?.cancel();
+        _userSubscription = null;
         currentUserData.value = null;
       } else {
         _listenToUserData(user.uid);
@@ -25,7 +26,6 @@ class UserSessionService {
     });
   }
 
-  // Listen to real-time updates so the UI populates as soon as the doc exists
   void _listenToUserData(String uid) {
     _userSubscription?.cancel();
     _userSubscription = _firestore.collection('users').doc(uid).snapshots().listen((snapshot) {
@@ -35,6 +35,14 @@ class UserSessionService {
     }, onError: (e) {
       debugPrint("Error listening to user session: $e");
     });
+  }
+
+  // New helper to update profile data (like image URL)
+  Future<void> updateUserData(Map<String, dynamic> data) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid != null) {
+      await _firestore.collection('users').doc(uid).update(data);
+    }
   }
 
   Future<void> fetchAndBindUserData(String uid) async {

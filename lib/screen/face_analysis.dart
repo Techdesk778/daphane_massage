@@ -13,22 +13,15 @@ class FaceAnalysisScreen extends StatefulWidget {
 }
 
 class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTickerProviderStateMixin {
-  // Logic & Camera State
   late AnimationController _animationController;
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isProcessing = false;
 
-  // Real-time Detection State
   String _liveShapeResult = "Align your face in the frame";
   bool _scanComplete = false;
 
-  final FaceDetector _faceDetector = FaceDetector(
-    options: FaceDetectorOptions(
-      enableContours: true,
-      performanceMode: FaceDetectorMode.accurate,
-    ),
-  );
+  late final FaceDetector _faceDetector;
 
   @override
   void initState() {
@@ -37,6 +30,15 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+
+    if (!kIsWeb) {
+      _faceDetector = FaceDetector(
+        options: FaceDetectorOptions(
+          enableContours: true,
+          performanceMode: FaceDetectorMode.accurate,
+        ),
+      );
+    }
 
     _initializeLiveCamera();
   }
@@ -59,23 +61,33 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
       );
 
       await _cameraController!.initialize();
-
       if (!mounted) return;
       setState(() => _isCameraInitialized = true);
 
-      // Start the real-time image stream
-      _cameraController!.startImageStream((CameraImage image) {
-        if (!_isProcessing && !_scanComplete) {
-          _isProcessing = true;
-          _processLiveFrame(image);
-        }
-      });
+      if (kIsWeb) {
+        _runWebSimulation();
+      } else {
+        _cameraController!.startImageStream((CameraImage image) {
+          if (!_isProcessing && !_scanComplete) {
+            _isProcessing = true;
+            _processLiveFrame(image);
+          }
+        });
+      }
     } catch (e) {
       debugPrint("Camera error: $e");
     }
   }
 
+  void _runWebSimulation() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) _updateUI("Analyzing facial structure...");
+    await Future.delayed(const Duration(seconds: 3));
+    if (mounted) _updateUI("Oval Structure Detected", complete: true);
+  }
+
   Future<void> _processLiveFrame(CameraImage image) async {
+    if (kIsWeb) return;
     try {
       final WriteBuffer allBytes = WriteBuffer();
       for (final Plane plane in image.planes) {
@@ -83,10 +95,9 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
       }
       final bytes = allBytes.done().buffer.asUint8List();
 
-      final cameraDescription = _cameraController!.description;
       final metadata = InputImageMetadata(
         size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: InputImageRotationValue.fromRawValue(cameraDescription.sensorOrientation) ?? InputImageRotation.rotation0deg,
+        rotation: InputImageRotationValue.fromRawValue(_cameraController!.description.sensorOrientation) ?? InputImageRotation.rotation0deg,
         format: InputImageFormatValue.fromRawValue(image.format.raw) ?? InputImageFormat.yuv420,
         bytesPerRow: image.planes[0].bytesPerRow,
       );
@@ -107,15 +118,12 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
         return;
       }
 
-      // Calculate Proportions
       final left = points.reduce((a, b) => a.x < b.x ? a : b);
       final right = points.reduce((a, b) => a.x > b.x ? a : b);
       final top = points.reduce((a, b) => a.y < b.y ? a : b);
       final bottom = points.reduce((a, b) => a.y > b.y ? a : b);
 
-      double width = (right.x - left.x).abs().toDouble();
-      double height = (bottom.y - top.y).abs().toDouble();
-      double ratio = height / (width == 0 ? 1 : width);
+      double ratio = (bottom.y - top.y).abs() / (right.x - left.x).abs();
 
       if (ratio > 1.45) {
         _updateUI("Oval Structure Detected", complete: true);
@@ -147,32 +155,34 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
   void dispose() {
     _animationController.dispose();
     _cameraController?.dispose();
-    _faceDetector.close();
+    if (!kIsWeb) {
+      _faceDetector.close();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Dynamic height calculation
+    final screenHeight = MediaQuery.of(context).size.height;
+    final frameHeight = (screenHeight * 0.45).clamp(250.0, 380.0);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Live Feed
           Positioned.fill(
             child: _isCameraInitialized
                 ? AspectRatio(aspectRatio: _cameraController!.value.aspectRatio, child: CameraPreview(_cameraController!))
                 : const Center(child: CircularProgressIndicator(color: Colors.white)),
           ),
-
-          // UI Overlays
           Positioned.fill(child: Container(color: Colors.black.withOpacity(0.3))),
-
           SafeArea(
             child: Column(
               children: [
                 _buildHeader(),
                 const Spacer(),
-                _buildScannerFrame(),
+                _buildScannerFrame(frameHeight), // Pass dynamic height
                 const Spacer(),
                 _buildStatusCard(),
               ],
@@ -185,7 +195,7 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -197,11 +207,11 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
     );
   }
 
-  Widget _buildScannerFrame() {
+  Widget _buildScannerFrame(double height) {
     return Center(
       child: Container(
-        width: 280,
-        height: 380,
+        width: height * 0.75, // Maintain aspect ratio
+        height: height,
         decoration: BoxDecoration(
           border: Border.all(color: _scanComplete ? Colors.green : AppColors.sharpPink, width: 2),
           borderRadius: BorderRadius.circular(40),
@@ -212,7 +222,7 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
               AnimatedBuilder(
                 animation: _animationController,
                 builder: (context, child) => Positioned(
-                  top: _animationController.value * 380,
+                  top: _animationController.value * height,
                   left: 0,
                   right: 0,
                   child: Container(height: 4, decoration: BoxDecoration(color: AppColors.sharpPink, boxShadow: [BoxShadow(color: AppColors.sharpPink.withOpacity(0.8), blurRadius: 20, spreadRadius: 4)])),
@@ -226,12 +236,13 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
 
   Widget _buildStatusCard() {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.fromLTRB(32, 24, 32, 32),
       decoration: const BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
       child: Column(
+        mainAxisSize: MainAxisSize.min, // Prevents taking unnecessary space
         children: [
           Text(_liveShapeResult, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           if (_scanComplete)
             SizedBox(
               width: double.infinity, height: 56,
@@ -242,7 +253,7 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
               ),
             )
           else
-            const CircularProgressIndicator(color: AppColors.sharpPink),
+            const SizedBox(height: 40, width: 40, child: CircularProgressIndicator(color: AppColors.sharpPink)),
         ],
       ),
     );

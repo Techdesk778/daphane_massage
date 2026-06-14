@@ -54,9 +54,12 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     try {
+      // NORMALIZE EMAIL: Convert to lowercase to ensure consistent lookups and prevent duplicates due to casing
+      final String email = _emailController.text.trim().toLowerCase();
+
       // 1. Authenticate and register user credentials inside Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
+        email: email,
         password: _passwordController.text.trim(),
       );
 
@@ -66,7 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'uid': uid,
         'fullName': _nameController.text.trim(),
-        'email': _emailController.text.trim(),
+        'email': email, // Saved in lowercase
         'phoneNumber': _phoneController.text.trim(),
         'address': _addressController.text.trim(),
         'createdAt': FieldValue.serverTimestamp(),
