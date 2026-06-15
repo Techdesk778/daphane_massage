@@ -69,7 +69,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             backgroundColor: AppColors.navy,
             title: const Text("Success", style: TextStyle(color: Colors.white)),
             content: const Text(
-              "Ritual reset link sent! Please check your email inbox.",
+              "your reset link sent! Please check your email inbox.",
               style: TextStyle(color: Colors.white70),
             ),
             actions: [
@@ -141,7 +141,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   cursorColor: AppColors.sharpPink,
                   decoration: InputDecoration(
                     icon: const Icon(Icons.mail_outline_rounded, color: AppColors.sharpPink, size: 24),
-                    hintText: "ritualist@email.com",
+                    hintText: "peter@email.com",
                     hintStyle: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 16),
                     border: InputBorder.none,
                     errorStyle: const TextStyle(color: Colors.redAccent, height: 0.8),

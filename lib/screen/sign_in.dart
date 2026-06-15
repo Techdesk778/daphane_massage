@@ -80,7 +80,7 @@ class _SigninScreenState extends State<SigninScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text("Login to continue your glow ritual",
+              const Text("Login to continue your glow routine",
                   style: TextStyle(color: Colors.white70)),
               const SizedBox(height: 40),
 

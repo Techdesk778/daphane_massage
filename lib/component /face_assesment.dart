@@ -63,7 +63,7 @@ class _FaceAssessmentScreenState extends State<FaceAssessmentScreen> {
 
     if (totalScore <= 60) {
       return {
-        "title": "The Contour Sculpt Ritual",
+        "title": "The Contour Sculpt Routine",
         "description": "Perfect for your profile! Focus on upward lifting strokes using deep finger kneading along the jawline and cheek paths to naturally stimulate lymphatic drainage and highlight structural symmetry."
       };
     } else if (totalScore <= 90) {

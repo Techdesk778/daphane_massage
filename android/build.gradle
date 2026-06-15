@@ -1,29 +1,37 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
+subprojects { project ->
+    project.beforeEvaluate {
+        def androidExt = project.extensions.findByName('android')
+        if (androidExt != null) {
+            if (!androidExt.hasProperty('flutter')) {
+                androidExt.ext.flutter = rootProject.extensions.findByName('flutter')
+            }
+        }
     }
-    dependencies {
-        // Updated to 4.4.4 as suggested by Android to read your google-services.json file
-        classpath 'com.google.gms:google-services:4.4.4'
+
+    project.plugins.whenPluginAdded { plugin ->
+        if (plugin.class.name.startsWith("com.android.build.gradle.LibraryPlugin") ||
+                plugin.class.name.startsWith("com.android.build.gradle.AppPlugin")) {
+
+            project.android {
+                if (namespace == null) {
+                    namespace = "com.example.${project.name.replaceAll(/[.\-_]/, "")}"
+                }
+            }
+
+            // CRITICAL FIX: Intercept manifest merger tasks to fix legacy package blocks
+            if (project.name == "flutter_inappwebview") {
+                project.tasks.matching { it.name.contains("process") && it.name.contains("Manifest") }.configureEach { task ->
+                    task.doFirst {
+                        def manifestFile = file("${project.projectDir}/src/main/AndroidManifest.xml")
+                        if (manifestFile.exists()) {
+                            def contents = manifestFile.text
+                            if (contents.contains('package="com.pichillilorenzo.flutter_inappwebview"')) {
+                                manifestFile.text = contents.replace('package="com.pichillilorenzo.flutter_inappwebview"', '')
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-rootProject.buildDir = "../build"
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
-}
-
-tasks.register("clean", Delete) {
-    delete rootProject.buildDir
 }

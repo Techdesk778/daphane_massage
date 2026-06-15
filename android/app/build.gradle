@@ -1,50 +1,48 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
     id "com.google.gms.google-services"
 }
 
 android {
     namespace = "com.daphane.massage"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+
+    compileSdk = 35
+    ndkVersion = "25.1.8937393"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        applicationId = "com.daphane.massage"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        applicationId "com.daphane.massage"
+
+        minSdk = 23
+        targetSdk = 35
+
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
         }
     }
 }
 
 flutter {
+    // Adjusted to single-dot for Monterey path resolution
     source = "../.."
 }
 
-// ADD THIS TO THE ABSOLUTE BOTTOM OF YOUR FILE:
 dependencies {
-    // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:33.10.0')
-
-    // Add the dependencies for Firebase products you want to use
     implementation 'com.google.firebase:firebase-analytics'
 }

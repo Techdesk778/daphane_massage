@@ -154,7 +154,7 @@ class _LiveFaceScannerScreenState extends State<LiveFaceScannerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text("Live Ritual Scanner", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text("Live facial Scanner", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),

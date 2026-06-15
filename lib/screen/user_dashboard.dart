@@ -234,7 +234,7 @@ class _UserDashboardState extends State<UserDashboard> {
                   Text("3 DAY STREAK",
                       style: TextStyle(
                           fontWeight: FontWeight.bold, color: Colors.white)),
-                  Text("Keep up the ritual!",
+                  Text("Keep up the routine!",
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

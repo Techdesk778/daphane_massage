@@ -249,7 +249,7 @@ class _FaceAnalysisScreenState extends State<FaceAnalysisScreen> with SingleTick
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.sharpPink),
                 onPressed: () => Navigator.pop(context),
-                child: const Text("Unlock Ritual Map", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Text("Unlock Routine Map", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             )
           else

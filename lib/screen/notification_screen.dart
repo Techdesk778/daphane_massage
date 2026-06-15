@@ -30,7 +30,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   final List<RitualNotification> _notifications = [
     RitualNotification(
       id: "1",
-      title: "Glow Ritual Scheduled Successfully",
+      title: "Glow Routine Scheduled Successfully",
       body: "Your Lavender Aromatherapy Session has been locked in for tomorrow at 2:30 PM with Therapist Sarah.",
       timestamp: "2 mins ago",
       isRead: false,
@@ -68,7 +68,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       backgroundColor: AppColors.navy,
       appBar: AppBar(
         title: const Text(
-            "Ritual Alerts",
+            "Routine Alerts",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)
         ),
         backgroundColor: Colors.transparent,
@@ -205,7 +205,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           const SizedBox(height: 20),
           const Text(
-              "No new ritual alerts",
+              "No new routines alerts",
               style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w600)
           ),
           const SizedBox(height: 4),

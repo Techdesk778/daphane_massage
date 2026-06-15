@@ -50,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Sign Out"),
-        content: const Text("Are you sure you want to end your ritual session?"),
+        content: const Text("Are you sure you want to end your routine session?"),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           TextButton(
@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         valueListenable: UserSessionService.instance.currentUserData,
         builder: (context, userData, child) {
           // These now pull directly from the real-time Firestore listener
-          final String displayName = userData?['fullName'] ?? "Glow Ritualist";
+          final String displayName = userData?['fullName'] ?? "Glow Routine";
           final String displayEmail = userData?['email'] ?? FirebaseAuth.instance.currentUser?.email ?? "";
           final String rawPlan = userData?['subscriptionPackage'] ?? "Beginner";
           final String tierLabel = AccountLogic.getTierDisplay(rawPlan);
@@ -167,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildSettingTile(
                         icon: Icons.notifications_none,
                         title: "Notifications",
-                        subtitle: "Glow ritual alerts",
+                        subtitle: "Glow routine alerts",
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen())),
                       ),
                       const Divider(height: 1, indent: 56),

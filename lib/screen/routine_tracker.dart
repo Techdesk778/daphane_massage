@@ -114,7 +114,7 @@ class _RoutineTrackerScreenState extends State<RoutineTrackerScreen> {
                         const Text("Today's Progress", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark)),
                         const SizedBox(height: 4),
                         Text(
-                          "Keep up your ritual cycle to maintain your glow.",
+                          "Keep up your routine cycle to maintain your glow.",
                           style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                         ),
                         if (_missedCount > 0) ...[
@@ -140,7 +140,7 @@ class _RoutineTrackerScreenState extends State<RoutineTrackerScreen> {
 
             // --- SECTION TITLE ---
             const Text(
-              "Daily Ritual Timeline",
+              "Daily Routine Timeline",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
             ),
             const SizedBox(height: 16),
